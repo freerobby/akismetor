@@ -26,39 +26,66 @@ end
 describe Akismetor do
   include AkismetorSpecHelper
 
-  describe "in general" do
+  describe "plugin requirements" do
 
     def mock_akismet(value)
       @response = stub("response", :body => value)
       @http = stub("http", :post => @response)
     end
 
-    it ".valid_key? should connect to host 'rest.akismet.com' " do
-      mock_akismet('true')
-      Net::HTTP.should_receive(:new).with('rest.akismet.com', anything()).and_return(@http)
-      Akismetor.valid_key?(valid_attributes)
-    end
-
-    it ".spam? should connect to host 'YourApiKey.rest.akismet.com' " do
-      mock_akismet('true')
-      Net::HTTP.should_receive(:new).with('123456789.rest.akismet.com', anything()).and_return(@http)
-      Akismetor.spam?(valid_attributes)
-    end
-
-    it ".spam? should convert Akismet's string 'true' to boolean true" do
+    it ".spam? should convert provider's string 'true' to boolean true" do
       mock_akismet('true')
       Net::HTTP.should_receive(:new).and_return(@http)
       Akismetor.spam?(invalid_attributes).should be_true
     end
 
-    it ".spam? should convert Akismet's string 'false' to boolean false" do
+    it ".spam? should convert provier's string 'false' to boolean false" do
       mock_akismet('false')
       Net::HTTP.should_receive(:new).and_return(@http)
       Akismetor.spam?(invalid_attributes).should be_false
     end
+    
+    describe "with akismet" do
+      before do
+        @implicit_attributes = valid_attributes
+        @explicit_attributes = valid_attributes.with(:provider => :akismet)
+      end
+      
+      it ".valid_key? should connect to host 'rest.akismet.com' " do
+        mock_akismet('true')
+        Net::HTTP.should_receive(:new).exactly(:twice).with('rest.akismet.com', anything()).and_return(@http)
+        Akismetor.valid_key?(@implicit_attributes)
+        Akismetor.valid_key?(@explicit_attributes)
+      end
+      
+      it ".spam? should connect to host 'YourApiKey.rest.akismet.com' " do
+        mock_akismet('true')
+        Net::HTTP.should_receive(:new).exactly(:twice).with('YourApiKey.rest.akismet.com', anything()).and_return(@http)
+        Akismetor.spam?(@implicit_attributes)
+        Akismetor.spam?(@explicit_attributes)
+      end
+    end
+    
+    describe "with typepad" do
+      before do
+        @attributes = valid_attributes.with(:provider => :typepad)
+      end
+      
+      it ".valid_key? should connect to host 'api.antispam.typepad.com' " do
+        mock_akismet('true')
+        Net::HTTP.should_receive(:new).with('api.antispam.typepad.com', anything()).and_return(@http)
+        Akismetor.valid_key?(@attributes)
+      end
+      
+      it ".spam? should connect to host 'YourApiKey.api.antispam.typepad.com' " do
+        mock_akismet('true')
+        Net::HTTP.should_receive(:new).with('YourApiKey.api.antispam.typepad.com', anything()).and_return(@http)
+        Akismetor.spam?(@attributes)
+      end
+    end
   end
 
-  describe "testing Akismet's commands" do
+  describe "provider commands" do
 
     before(:each) do
       @response = stub("response", :body => 'true')
@@ -66,22 +93,22 @@ describe Akismetor do
       Net::HTTP.should_receive(:new).and_return(@http)
     end
     
-    it ".valid_key? should run Akismet's command 'verify-key' " do
+    it ".valid_key? should run provider's command 'verify-key' " do
       @http.should_receive(:post).with('/1.1/verify-key', anything(), anything()).and_return(@response)
       Akismetor.valid_key?(valid_attributes)
     end
 
-    it ".spam? should run Akismet's command 'comment-check' " do
+    it ".spam? should run provider's command 'comment-check' " do
       @http.should_receive(:post).with('/1.1/comment-check', anything(), anything()).and_return(@response)
       Akismetor.spam?(valid_attributes)
     end
 
-    it ".submit_spam should run Akismet's command 'submit-spam' " do
+    it ".submit_spam should run provider's command 'submit-spam' " do
       @http.should_receive(:post).with('/1.1/submit-spam', anything(), anything()).and_return(@response)
       Akismetor.submit_spam(valid_attributes)
     end
 
-    it ".submit_ham should run Akismet's command 'submit-ham' " do
+    it ".submit_ham should run provider's command 'submit-ham' " do
       @http.should_receive(:post).with('/1.1/submit-ham', anything(), anything()).and_return(@response)
       Akismetor.submit_ham(valid_attributes)
     end

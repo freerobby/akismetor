@@ -2,6 +2,9 @@ class Akismetor
   attr_accessor :attributes
 
   require 'net/http'
+  
+  API_HOST_AKISMET = "rest.akismet.com"
+  API_HOST_TYPEPAD = "api.antispam.typepad.com"
 
   # Does a key-check on Akismet so you know you can actually use a specific key.
   # Returns "valid" or "invalid" depending on response.
@@ -32,8 +35,9 @@ class Akismetor
   end
 
   def execute(command)
-    host = "#{@attributes[:key]}." if attributes[:key] && command != 'verify-key'
-    http = Net::HTTP.new("#{host}rest.akismet.com", 80)
+    host = (@attributes[:provider] != :typepad) ? API_HOST_AKISMET : API_HOST_TYPEPAD
+    host_prefix = "#{@attributes[:key]}." if attributes[:key] && command != 'verify-key'
+    http = Net::HTTP.new("#{host_prefix}#{host}", 80)
     http.post("/1.1/#{command}", attributes_for_post, http_headers).body
   end
 

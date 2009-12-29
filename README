@@ -1,3 +1,13 @@
+= Now with TypePad support!
+
+Akismetor now supports the free TypePad API in addition to Akismet.
+
+To switch to TypePad, add
+  :provider => :typepad
+to your attributes hash (and don't forget to set your API key to your TypePad key).
+
+If you wish to continue using Akismet, you need do nothing.
+
 = Akismetor 1.1
 
 This version includes rSpec tests and a method to verify the Akismet key.
