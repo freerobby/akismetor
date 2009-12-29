@@ -4,7 +4,7 @@ require File.dirname(__FILE__) + '/../lib/akismetor'
 module AkismetorSpecHelper
   def valid_attributes
     {
-      :key => '123456789', 
+      :key => 'YourApiKey', 
       :blog => 'http://www.my-site.com', 
       :user_ip => '200.10.20.30', 
       :user_agent => 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; en-US; rv:1.9.0.3) Gecko/2008092414 Firefox/3.0.3', 
@@ -39,7 +39,7 @@ describe Akismetor do
       Akismetor.valid_key?(valid_attributes)
     end
 
-    it ".spam? should connect to host '123456789.rest.akismet.com' " do
+    it ".spam? should connect to host 'YourApiKey.rest.akismet.com' " do
       mock_akismet('true')
       Net::HTTP.should_receive(:new).with('123456789.rest.akismet.com', anything()).and_return(@http)
       Akismetor.spam?(valid_attributes)
