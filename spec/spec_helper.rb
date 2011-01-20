@@ -1,4 +1,4 @@
-require 'spec'
+require 'rspec'
 
 # rSpec Hash additions. From 
 #   * http://wincent.com/knowledge-base/Fixtures_considered_harmful%3F
@@ -30,5 +30,5 @@ class Hash
   end
 end
 
-Spec::Runner.configure do |config|
+RSpec::configure do |config|
 end
